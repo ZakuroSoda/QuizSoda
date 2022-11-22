@@ -1,7 +1,7 @@
 {% include 'baseHeadNoLogin.html' %}
 <div class="container">
     <div class="row my-5">
-        <h1>Category: Balls</h1>
+        <h1>Category: Web</h1>
     </div>
     <div class="row my-5">
         <div class="col-sm mx-1">
@@ -13,19 +13,9 @@
                 <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal" class="stretched-link"></a>
             </div>
         </div>
-        <div class="col-sm mx-1">
-            <div class="col-sm mx-1">
-                <div class="card px-3" style="width: 18rem;">
-                    <div class="card-body">
-                      <h5 class="card-title">Challenge Name</h5>
-                      <p class="card-text">500</p>
-                    </div>
-                    <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
         <div class="col-sm mx-1"></div>
-      </div>
+        <div class="col-sm mx-1"></div>
+    </div>
 
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -36,21 +26,19 @@
           <ul class="d-grid gap-4 my-4 list-unstyled">
             <li class="d-flex gap-4">
               <div>
-                Lorem Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque massa vulputate faucibus malesuada. Duis dapibus nunc in mollis faucibus. Morbi mattis congue erat ut commodo. Etiam interdum, dui sollicitudin varius rhoncus, odio lacus tristique purus, at venenatis lorem lectus eu tortor. Aenean in augue sit amet erat efficitur malesuada in vel velit.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque massa vulputate faucibus malesuada. Duis dapibus nunc in mollis faucibus. Morbi mattis congue erat ut commodo. Etiam interdum, dui sollicitudin varius rhoncus, odio lacus tristique purus, at venenatis lorem lectus eu tortor. Aenean in augue sit amet erat efficitur malesuada in vel velit.
               </div>
             </li>
-            <li class="d-flex gap-4">
-                <div>
-                </div>
-              </li>
           </ul>
           <div class="g-1 row">
             <div class="col-md-7">
-                <input type="text" class="form-control" id="answer" placeholder="answer" required>
+                <form action="#" method="POST">
+                  <input type="text" class="form-control" id="answer" placeholder="answer" required> 
             </div>
             <div class="col-md-3">
-                <button type="button" style="width: 100%;" class="btn btn-outline-primary">Submit</button>
-            </div>
+                  <button type="submit" style="width: 100%;" class="btn btn-outline-primary">Submit</button>
+                </form>
+              </div>
             <div class="col-md-2">
                 <button type="button" style="width: 100%;" data-bs-dismiss="modal" class="btn btn-outline-danger">Close</button>
             </div>
@@ -59,6 +47,7 @@
       </div>
     </div>
   </div><!--modal end-->
+
 </div>
 </body>
 </html>

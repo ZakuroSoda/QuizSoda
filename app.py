@@ -1,4 +1,5 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
+from hashlib import sha256
 
 app = Flask(__name__)
 
@@ -10,9 +11,18 @@ def index():
 def login():
     return render_template('login.html', navBarPage="login")
     
-@app.route('/register')
+@app.route('/register', methods=['GET','POST'])
 def register():
-    return render_template('register.html', navBarPage="register")
+    if request.method == "GET":
+        #if not logged in
+        return render_template('register.html', navBarPage="register")
+        #if logged in
+            # redirect to home
+    elif request.method == "POST":
+        # since this application is meant to be small I really don't mind slapping all the validation here
+        username, password, passwordConfirm = request.form['username'], request.form['password'], request.form['passwordConfirm']
+        if password != passwordConfirm:
+            return redirect(url_for('register')), 302 
 
 @app.route('/challenges')
 def challenge():

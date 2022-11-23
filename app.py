@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from hashlib import sha256
+import sqlite3
 
 app = Flask(__name__)
 
@@ -22,7 +23,37 @@ def register():
         # since this application is meant to be small I really don't mind slapping all the validation here
         username, password, passwordConfirm = request.form['username'], request.form['password'], request.form['passwordConfirm']
         if password != passwordConfirm:
-            return redirect(url_for('register')), 302 
+            return render_template('register.html', navBarPage='register', message='Your passwords do not match. Please try again.')
+        
+        # check for username already exists
+        try:
+            con = sqlite3.connect("database.db")
+            cur = con.cursor()
+            cur.execute("SELECT username FROM users WHERE username=?", (username, ))
+            if len(cur.fetchall()) != 0:
+                return render_template('register.html', navBarPage='register', message='Invalid username.')
+
+        except Exception as e:
+            print(e)
+            return render_template('register.html', navBarPage='register', message='There was an unexpected error. Please contact an admin.')
+        
+        try:
+            passwordHash = sha256(password.encode('utf-8')).hexdigest()
+        except Exception as e:
+            print(e)
+            return render_template('register.html', navBarPage='register', message='There was an unexpected error. Please contact an admin.')
+        
+        try:
+            con = sqlite3.connect("database.db")
+            cur = con.cursor()
+            cur.execute("INSERT INTO users VALUES(?, ?)", (username, passwordHash))
+            con.commit()
+        except Exception as e:
+            print(e)
+            return render_template('register.html', navBarPage='register', message='There was an unexpected error. Please contact an admin.')
+        
+        # successfully registered! (set as authenticated and redirect to home)
+        return 'test'
 
 @app.route('/challenges')
 def challenge():

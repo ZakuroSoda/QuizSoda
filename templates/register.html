@@ -1,5 +1,8 @@
 {% include 'baseHeadNoLogin.html' %}
 <div class="position-absolute top-50 start-50 translate-middle">
+  <div class="alert alert-info mt-5" {% if not message %} style='display: none;' {% endif %} role="alert">
+    {{message}}
+  </div>
 <form method="POST">
     <div class="form-group">
         <h5>Username</h5>

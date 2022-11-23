@@ -8,9 +8,35 @@ app = Flask(__name__)
 def index():
     return render_template('index.html', navBarPage="home")
 
-@app.route('/login')
+@app.route('/login', methods=['GET','POST'])
 def login():
-    return render_template('login.html', navBarPage="login")
+    if request.method == "GET":
+        #if not logged in
+        return render_template('login.html', navBarPage="login")
+        #if logged in
+            # redirect to home
+    if request.method == "POST":
+        try:
+            username, passwordHash = request.form['username'], sha256(request.form['password'].encode('utf-8')).hexdigest()
+        except Exception as e:
+            print(e)
+            return render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.')
+        
+        try:
+            con = sqlite3.connect("database.db")
+            cur = con.cursor()
+            cur.execute("SELECT username, password FROM users WHERE username=? AND password=?", (username, passwordHash))
+            results = cur.fetchall()
+            if len(results) == 0:
+                return render_template('login.html', navBarPage='login', message='Wrong username or password.')
+            elif len(results) == 1 and results[0][0] == username:
+                return "TEST"
+                # logged in (set as authenticated and return to home)
+
+        except Exception as e:
+            print(e)
+            return render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.')
+
     
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -48,6 +74,7 @@ def register():
             cur = con.cursor()
             cur.execute("INSERT INTO users VALUES(?, ?)", (username, passwordHash))
             con.commit()
+
         except Exception as e:
             print(e)
             return render_template('register.html', navBarPage='register', message='There was an unexpected error. Please contact an admin.')

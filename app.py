@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, make_response
 from hashlib import sha256
 import sqlite3
+from auth import SessionManager
 
 app = Flask(__name__)
 
@@ -11,10 +12,16 @@ def index():
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == "GET":
-        #if not logged in
-        return render_template('login.html', navBarPage="login")
-        #if logged in
-            # redirect to home
+        session = SessionManager('database.db')
+        check = session.get_session(request.cookies)
+        if check == None: #if not logged in or if sessionID is wrong
+            resp = make_response(render_template('login.html', navBarPage="login"))
+            resp = session.remove_session(request.cookies, resp) 
+            # clear out the session id cookie for clean login (this func also removes the token from the db but since token does not exist nothing happens)
+            return resp
+        else: # if logged in
+            return redirect(url_for('index'))
+
     if request.method == "POST":
         try:
             username, passwordHash = request.form['username'], sha256(request.form['password'].encode('utf-8')).hexdigest()
@@ -27,11 +34,16 @@ def login():
             cur = con.cursor()
             cur.execute("SELECT username, password FROM users WHERE username=? AND password=?", (username, passwordHash))
             results = cur.fetchall()
+
             if len(results) == 0:
                 return render_template('login.html', navBarPage='login', message='Wrong username or password.')
+
             elif len(results) == 1 and results[0][0] == username:
-                return "TEST"
                 # logged in (set as authenticated and return to home)
+                session = SessionManager('database.db')
+                resp = make_response(redirect(url_for('index')))
+                resp = session.create_session(username, resp)
+                return resp
 
         except Exception as e:
             print(e)
@@ -41,10 +53,16 @@ def login():
 @app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == "GET":
-        #if not logged in
-        return render_template('register.html', navBarPage="register")
-        #if logged in
-            # redirect to home
+        session = SessionManager('database.db')
+        check = session.get_session(request.cookies)
+        if check == None: #if not logged in or if sessionID is wrong
+            resp = make_response(render_template('register.html', navBarPage="register"))
+            resp = session.remove_session(request.cookies, resp) 
+            # clear out the session id cookie for clean register (this func also removes the token from the db but since token does not exist nothing happens)
+            return resp
+        else: # if logged in
+            return redirect(url_for('index'))
+
     elif request.method == "POST":
         # since this application is meant to be small I really don't mind slapping all the validation here
         username, password, passwordConfirm = request.form['username'], request.form['password'], request.form['passwordConfirm']
@@ -80,10 +98,13 @@ def register():
             return render_template('register.html', navBarPage='register', message='There was an unexpected error. Please contact an admin.')
         
         # successfully registered! (set as authenticated and redirect to home)
-        return 'test'
+        session = SessionManager('database.db')
+        resp = make_response(redirect(url_for('index')))
+        resp = session.create_session(username, resp)
+        return resp
 
 @app.route('/challenges')
 def challenge():
     return render_template('challengeGallery.html', navBarPage="challenges")
 
-app.run(port=5000, host='0.0.0.0')
+app.run(port=5000, host='0.0.0.0', debug=True)

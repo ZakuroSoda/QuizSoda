@@ -93,21 +93,41 @@ def initialise():
 ALL_CHALLENGES, CHALLENGES_PER_CATEGORY = initialise()
 
 
-
 def generate_page():
-    for category in categories:
-        head = f"""
-<div class="row mx-3 my-5">
-    <h1>Category: {category}</h1>
-</div>
-"""
-        rows = ceil(CHALLENGES_PER_CATEGORY[category] / 3)
-        finalRowCards = CHALLENGES_PER_CATEGORY[category] % 3
-        cards = []
 
-        for i in range(rows):
-            if i+1 != rows: #not on final row yet
-                for challenge in ALL_CHALLENGES
+    ### Do not touch this disgusting code and solution ###
+
+    cards, working = [], []
+    prevCategory = categories[0]
+
+    for i in range(len(ALL_CHALLENGES)):
+        print(i)
+        card = ALL_CHALLENGES[i].create_card()
+        working.append(card)
+
+        if i != len(ALL_CHALLENGES)-1:
+            if prevCategory != ALL_CHALLENGES[i+1].category:
+                prevCategory = ALL_CHALLENGES[i+1].category
+                cards.append(working)
+                working = []
+        else: #on the last chall
+            cards.append(working)
+            working = [] # not needed, for standardisation
+
+    ### This is how cards is organised: [[challenge with cat 1, challenge with cat 1], [challenge with cat 2, challenge with cat 2, challenge with cat 2]]
+    ### Do not touch this disgusting code and solution ###
+
+#     for category in categories:
+#         head = f"""
+# <div class="row mx-3 my-5">
+#     <h1>Category: {category}</h1>
+# </div>
+# """
+#         rows = ceil(CHALLENGES_PER_CATEGORY[category] / 3)
+#         finalRowCards = CHALLENGES_PER_CATEGORY[category] % 3
+#         cards = []
+
+                    
 ### LEFT OFF HERE ###
 
     finalTemplate = """
@@ -136,3 +156,6 @@ def generate_page():
 </body>
 </html>   
 """
+
+generate_page()
+

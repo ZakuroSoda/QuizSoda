@@ -1,6 +1,5 @@
 import os
-
-
+from math import ceil
 
 class Challenge:
 
@@ -62,18 +61,78 @@ class Challenge:
 """
         return template
 
-allChallenges = []
 
-for category in os.listdir('./challenges'):
-    for challenge in os.listdir(f'./challenges/{category}'):
-        try:
-            allChallenges.append(Challenge(
-                category,
-                challenge, 
-                open(f'./challenges/{category}/{challenge}/DESCRIPTION', 'r').read(), 
-                open(f'./challenges/{category}/{challenge}/FLAG', 'r').read(),
-                int(open(f'./challenges/{category}/{challenge}/POINTS', 'r').read())
-            ))
-        except Exception as e:
-            print(e)
+def initialise():
+    allChallenges = []
 
+    global categories
+    categories = os.listdir('./challenges')
+
+    challengesPerCategory = {}
+
+    for category in categories:
+        challengeCounter = 1
+        for challenge in os.listdir(f'./challenges/{category}'):
+            try:
+                allChallenges.append(Challenge(
+                    category,
+                    challenge, 
+                    open(f'./challenges/{category}/{challenge}/DESCRIPTION', 'r').read(), 
+                    open(f'./challenges/{category}/{challenge}/FLAG', 'r').read(),
+                    int(open(f'./challenges/{category}/{challenge}/POINTS', 'r').read())
+                ))
+                challengesPerCategory[category] = challengeCounter
+                challengeCounter += 1
+            except Exception as e:
+                print(e)
+
+    return allChallenges, challengesPerCategory
+
+
+
+ALL_CHALLENGES, CHALLENGES_PER_CATEGORY = initialise()
+
+
+
+def generate_page():
+    for category in categories:
+        head = f"""
+<div class="row mx-3 my-5">
+    <h1>Category: {category}</h1>
+</div>
+"""
+        rows = ceil(CHALLENGES_PER_CATEGORY[category] / 3)
+        finalRowCards = CHALLENGES_PER_CATEGORY[category] % 3
+        cards = []
+
+        for i in range(rows):
+            if i+1 != rows: #not on final row yet
+                for challenge in ALL_CHALLENGES
+### LEFT OFF HERE ###
+
+    finalTemplate = """
+{% include 'baseHeadNoLogin.html' %}
+<div class="container">
+    {head}
+    <div class="row my-5">
+        <div class="col-sm mx-3">
+            <div class="card px-3" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">Challenge Name</h5>
+                  <p class="card-text">500</p>
+                </div>
+                <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal" class="stretched-link"></a>
+            </div>
+        </div>
+        <div class="col-sm mx-3"></div>
+        <div class="col-sm mx-3"></div>
+    </div>
+
+  {modal}
+  {modal}
+  {modal}
+
+</div>
+</body>
+</html>   
+"""

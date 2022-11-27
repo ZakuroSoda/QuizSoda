@@ -1,3 +1,5 @@
+# Wow spent 7 days on 200 lines of disgusting code which isn't even fully functional but I'm happy for now
+
 import os
 from math import ceil
 
@@ -8,7 +10,7 @@ class Challenge:
     def __init__(self, category, title, description, flag, points):
         self.category, self.title, self.description, self.flag, self.points = category, title, description, flag, points
 
-        self.id = Challenge.CHALLENGEID
+        self.id = f'challenge-{Challenge.CHALLENGEID}'
         Challenge.CHALLENGEID += 1
 
         self.solves = 0
@@ -61,7 +63,6 @@ class Challenge:
 """
         return template
 
-
 def initialise():
     allChallenges = []
 
@@ -86,14 +87,13 @@ def initialise():
             except Exception as e:
                 print(e)
 
-    return allChallenges, challengesPerCategory
+    return allChallenges
 
-
-
-ALL_CHALLENGES, CHALLENGES_PER_CATEGORY = initialise()
-
+ALL_CHALLENGES = initialise()
 
 def generate_page():
+
+    ##### START OF CARD GENERATOR #####
 
     ### Do not touch this disgusting code and solution ###
 
@@ -101,7 +101,6 @@ def generate_page():
     prevCategory = categories[0]
 
     for i in range(len(ALL_CHALLENGES)):
-        print(i)
         card = ALL_CHALLENGES[i].create_card()
         working.append(card)
 
@@ -117,45 +116,92 @@ def generate_page():
     ### This is how cards is organised: [[challenge with cat 1, challenge with cat 1], [challenge with cat 2, challenge with cat 2, challenge with cat 2]]
     ### Do not touch this disgusting code and solution ###
 
-#     for category in categories:
-#         head = f"""
-# <div class="row mx-3 my-5">
-#     <h1>Category: {category}</h1>
-# </div>
-# """
-#         rows = ceil(CHALLENGES_PER_CATEGORY[category] / 3)
-#         finalRowCards = CHALLENGES_PER_CATEGORY[category] % 3
-#         cards = []
+    ALL_CARDS = [] # not a constant but do I care
+    ALL_MODALS = [] # again idc
 
-                    
-### LEFT OFF HERE ###
+    ### Generate Cards
+    for i in range(len(categories)):
+        categorySTRING = f"""
+<div class="row mx-3 my-5">
+    <h1>Category: {categories[i]}</h1>
+</div>
 
-    finalTemplate = """
+<div class="row my-5">
+"""        
+
+        cardsOfChallengesInThisCategory = cards[i]
+        counter = 0
+        
+        # forgive me lord for I have sinned with this solution
+        indexOfBeginningOfLastRow = len(cardsOfChallengesInThisCategory)-(len(cardsOfChallengesInThisCategory)%3)
+        # what are my var names lmao
+        if indexOfBeginningOfLastRow == len(cardsOfChallengesInThisCategory):
+            indexOfBeginningOfLastRow = indexOfBeginningOfLastRow-3
+        
+        for j in range(len(cardsOfChallengesInThisCategory)):
+
+            categorySTRING += cardsOfChallengesInThisCategory[j] + '\n'
+            counter += 1
+
+            if j == indexOfBeginningOfLastRow:
+                break
+            
+            if counter == 3:
+                categorySTRING += '</div>\n<div class="row my-5">'
+                counter = 0
+        
+        if (len(cardsOfChallengesInThisCategory) % 3) == 1:
+
+            categorySTRING += """
+<div class="col-sm mx-3"></div>
+<div class="col-sm mx-3"></div>
+</div>
+"""
+        elif (len(cardsOfChallengesInThisCategory) % 3) == 2:
+            
+            categorySTRING += cardsOfChallengesInThisCategory[j+1] + '\n'
+            categorySTRING += """
+<div class="col-sm mx-3"></div>
+</div>
+"""
+        else:
+            categorySTRING += cardsOfChallengesInThisCategory[j+1] + '\n'
+            categorySTRING += cardsOfChallengesInThisCategory[j+2] + '\n'
+            categorySTRING += '</div>\n'
+                
+
+        ALL_CARDS.append(categorySTRING)
+
+    ##### END OF CARD GENERATOR #####
+
+    ##### START OF MODAL GENERATOR #####
+    for i in range(len(ALL_CHALLENGES)):
+        modal = ALL_CHALLENGES[i].create_modal()
+        ALL_MODALS.append(modal)
+    ##### END OF MODAL GENERATOR
+    
+    ##### START FINAL ASSEMBLY #####
+    START = """
 {% include 'baseHeadNoLogin.html' %}
 <div class="container">
-    {head}
-    <div class="row my-5">
-        <div class="col-sm mx-3">
-            <div class="card px-3" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">Challenge Name</h5>
-                  <p class="card-text">500</p>
-                </div>
-                <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal" class="stretched-link"></a>
-            </div>
-        </div>
-        <div class="col-sm mx-3"></div>
-        <div class="col-sm mx-3"></div>
-    </div>
-
-  {modal}
-  {modal}
-  {modal}
-
+"""
+    END = """
 </div>
 </body>
-</html>   
+</html>    
 """
 
-generate_page()
+    FINAL = START
 
+    for categoryCards in ALL_CARDS:
+        FINAL += categoryCards
+    for modal in ALL_MODALS:
+        FINAL += modal
+
+    FINAL += END
+
+    generatedTemplate = open("./templates/generatedTemplate.html", "w")
+    generatedTemplate.write(FINAL)
+    generatedTemplate.close()
+
+generate_page()

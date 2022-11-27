@@ -115,6 +115,6 @@ def challenge():
     if check == None: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
     else:
-        return render_template('challengeGallery.html', navBarPage="challenges", authenticated=True)
+        return render_template('generatedTemplate.html', navBarPage="challenges", authenticated=True)
 
 app.run(port=5000, host='0.0.0.0', debug=True)

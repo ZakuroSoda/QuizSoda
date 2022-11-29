@@ -204,4 +204,5 @@ def generate_page():
     generatedTemplate.write(FINAL)
     generatedTemplate.close()
 
-generate_page()
+if __name__ == '__main__':
+    generate_page()

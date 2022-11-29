@@ -117,4 +117,15 @@ def challenge():
     else:
         return render_template('generatedTemplate.html', navBarPage="challenges", authenticated=True)
 
+@app.route('/account')
+def account():
+    session = SessionManager('database.db')
+    check = session.get_session(request.cookies)
+    if check == None: #if not logged in or if sessionID is wrong
+        return redirect(url_for('login'))
+    else:
+        username = check
+        
+    return render_template('account.html', navBarPage="account", authenticated=True)
+
 app.run(port=5000, host='0.0.0.0', debug=True)

@@ -4,18 +4,18 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content rounded-4 shadow">
             <div class="modal-body p-5">
-              <h2 class="fw-bold mb-0">zakurosoda</h2>
+              <h2 class="fw-bold mb-0">{{ username }}</h2>
               <ul class="d-grid gap-4 my-5 list-unstyled">
                 <li class="d-flex gap-4">
                     <img src="{{ url_for('static', filename='points.png') }}" class="bi text-muted flex-shrink-0" width="48" height="48">
                     <div>
-                        <h4 class="mb-0">4698 Points</h4>
+                        <h4 class="mb-0">{% if not points %}none{% endif %}{% if points %}{{points}}{% endif %} Points</h4>
                     </div>
                 </li>
                 <li class="d-flex gap-4">
                     <img src="{{ url_for('static', filename='podium.png') }}" class="bi text-muted flex-shrink-0" width="48" height="48">
                     <div>
-                        <h4 class="mb-0">2nd Place</h4>
+                        <h4 class="mb-0">{% if not placing %}none{% endif %}{% if placing %}{% if placing==1 %}1st{% endif %}{% if placing==2 %}2nd{% endif %}{% if placing==3 %}3rd{% endif %}{% if placing>3 %}{{placing}}th{% endif %}{% endif %} Place</h4>
                     </div>
                 </li>
               </ul>

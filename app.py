@@ -5,11 +5,18 @@ from auth import SessionManager
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
+def checkLoggedIn(request):
     session = SessionManager('database.db')
     check = session.get_session(request.cookies)
     if check == None: #if not logged in or if sessionID is wrong
+        return False
+    else:
+        return check
+
+@app.route('/')
+def index():
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False: #if not logged in or if sessionID is wrong
         return render_template('index.html', navBarPage="home", authenticated=False)
     else: # if logged in
         return render_template('index.html', navBarPage="home", authenticated=True)
@@ -110,22 +117,20 @@ def register():
 
 @app.route('/challenges')
 def challenge():
-    session = SessionManager('database.db')
-    check = session.get_session(request.cookies)
-    if check == None: #if not logged in or if sessionID is wrong
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
-    else:
+    else: # if logged in
         return render_template('generatedTemplate.html', navBarPage="challenges", authenticated=True)
 
 @app.route('/account')
 def account():
-    session = SessionManager('database.db')
-    check = session.get_session(request.cookies)
-    if check == None: #if not logged in or if sessionID is wrong
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
     else:
-        username = check
+        username = loggedIn
         
-    return render_template('account.html', navBarPage="account", authenticated=True)
+    return render_template('account.html', navBarPage="account", authenticated=True, username=username) # TEST VALUES MISSING: placing, points
 
 app.run(port=5000, host='0.0.0.0', debug=True)

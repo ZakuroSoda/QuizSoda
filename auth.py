@@ -1,5 +1,7 @@
 import sqlite3, flask
 from uuid import uuid4
+from hashlib import sha256
+from flask import make_response, render_template, redirect, url_for
 
 class SessionManager:
     def __init__(self, instance):
@@ -39,4 +41,36 @@ class SessionManager:
         self.con.commit()
         response.set_cookie('SESSIONID', '', expires=0)
         return response
+
+class AccountManager:
+    def __init__(self, instance):
+        self.con = sqlite3.connect(f'{instance}')
+        self.cur = self.con.cursor()
+    
+    def login(self, request: flask.Request) -> flask.Response: #temporary
+        try:
+            username, passwordHash = request.form['username'], sha256(request.form['password'].encode('utf-8')).hexdigest()
+        except Exception as e:
+            print(e)
+            resp = make_response(render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.', authenticated=False))
+            return resp
         
+        try:
+            self.cur.execute("SELECT username, password FROM users WHERE username=? AND password=?", (username, passwordHash))
+            results = self.cur.fetchall()
+
+            if len(results) == 0:
+                resp = make_response(render_template('login.html', navBarPage='login', message='Wrong username or password.', authenticated=False))
+                return resp
+
+            elif len(results) == 1 and results[0][0] == username:
+                # logged in (set as authenticated and return to home)
+                session = SessionManager('database.db')
+                resp = make_response(redirect(url_for('index')))
+                resp = session.create_session(username, resp)
+                return resp
+
+        except Exception as e:
+            print(e)
+            resp = make_response(render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.', authenticated=False))
+            return resp 

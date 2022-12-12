@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from hashlib import sha256
 import sqlite3
-from auth import SessionManager
+from auth import SessionManager, AccountManager
 
 app = Flask(__name__)
 
@@ -24,42 +24,19 @@ def index():
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == "GET":
-        session = SessionManager('database.db')
-        check = session.get_session(request.cookies)
-        if check == None: #if not logged in or if sessionID is wrong
+        loggedIn = checkLoggedIn(request)
+        if loggedIn == False: #if not logged in or if sessionID is wrong
             resp = make_response(render_template('login.html', navBarPage="login", authenticated=False))
-            resp = session.remove_session(request.cookies, resp) 
+            resp = SessionManager('database.db').remove_session(request.cookies, resp) 
             # clear out the session id cookie for clean login (this func also removes the token from the db but since token does not exist nothing happens)
             return resp
         else: # if logged in
             return redirect(url_for('index'))
 
     if request.method == "POST":
-        try:
-            username, passwordHash = request.form['username'], sha256(request.form['password'].encode('utf-8')).hexdigest()
-        except Exception as e:
-            print(e)
-            return render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.', authenticated=False)
-        
-        try:
-            con = sqlite3.connect("database.db")
-            cur = con.cursor()
-            cur.execute("SELECT username, password FROM users WHERE username=? AND password=?", (username, passwordHash))
-            results = cur.fetchall()
-
-            if len(results) == 0:
-                return render_template('login.html', navBarPage='login', message='Wrong username or password.', authenticated=False)
-
-            elif len(results) == 1 and results[0][0] == username:
-                # logged in (set as authenticated and return to home)
-                session = SessionManager('database.db')
-                resp = make_response(redirect(url_for('index')))
-                resp = session.create_session(username, resp)
-                return resp
-
-        except Exception as e:
-            print(e)
-            return render_template('login.html', navBarPage='login', message='There was an unexpected error. Please contact an admin.', authenticated=False)
+        account = AccountManager('database.db')
+        resp = account.login(request)
+        return resp
 
     
 @app.route('/register', methods=['GET','POST'])

@@ -1,7 +1,4 @@
-# Wow spent 7 days on 200 lines of disgusting code which isn't even fully functional but I'm happy for now
-
 import os
-from math import ceil
 
 class Challenge:
 
@@ -28,6 +25,7 @@ class Challenge:
 </div>
         """
         return template
+        
     def create_modal(self) -> str:
         template = f"""
 <div class="modal fade" id="{self.id}" tabindex="-1" aria-hidden="true">

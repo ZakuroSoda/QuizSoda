@@ -65,7 +65,7 @@ class AccountManager:
 
             elif len(results) == 1 and results[0][0] == username:
                 # logged in (set as authenticated and return to home)
-                session = SessionManager('database.db')
+                session = SessionManager('./db/database.db')
                 resp = make_response(redirect(url_for('index')))
                 resp = session.create_session(username, resp)
                 return resp
@@ -111,7 +111,7 @@ class AccountManager:
             return resp
 
         # successfully registered! (set as authenticated and redirect to home)
-        session = SessionManager('database.db')
+        session = SessionManager('./db/database.db')
         resp = make_response(redirect(url_for('index')))
         resp = session.create_session(username, resp)
         return resp

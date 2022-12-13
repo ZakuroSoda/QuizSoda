@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
-from hashlib import sha256
-import sqlite3
 from auth import SessionManager, AccountManager
 
 app = Flask(__name__)
 
 def checkLoggedIn(request):
-    session = SessionManager('database.db')
+    session = SessionManager('./db/database.db')
     check = session.get_session(request.cookies)
     if check == None: #if not logged in or if sessionID is wrong
         return False
@@ -28,7 +26,7 @@ def login():
 
         if loggedIn == False: #if not logged in or if sessionID is wrong
             resp = make_response(render_template('login.html', navBarPage="login", authenticated=False))
-            resp = SessionManager('database.db').remove_session(request.cookies, resp) 
+            resp = SessionManager('./db/database.db').remove_session(request.cookies, resp) 
             # clear out the session id cookie for clean login (this func also removes the token from the db but since token does not exist nothing happens)
             return resp
             
@@ -36,7 +34,7 @@ def login():
             return redirect(url_for('index'))
 
     if request.method == "POST":
-        account = AccountManager('database.db')
+        account = AccountManager('./db/database.db')
         resp = account.login(request)
         return resp
 
@@ -48,14 +46,14 @@ def register():
 
         if loggedIn == False: #if not logged in or if sessionID is wrong
             resp = make_response(render_template('register.html', navBarPage="register", authenticated=False))
-            resp = SessionManager('database.db').remove_session(request.cookies, resp) 
+            resp = SessionManager('./db/database.db').remove_session(request.cookies, resp) 
             # clear out the session id cookie for clean register (this func also removes the token from the db but since token does not exist nothing happens)
             return resp
         else: # if logged in
             return redirect(url_for('index'))
 
     elif request.method == "POST":
-        account = AccountManager('database.db')
+        account = AccountManager('./db/database.db')
         resp = account.register(request)
         return resp
 
@@ -84,7 +82,8 @@ def logout():
         return redirect(url_for('login'))
     else:
         resp = make_response(redirect(url_for('index')))
-        resp = SessionManager('database.db').remove_session(request.cookies, resp)
+        resp = SessionManager('./db/database.db').remove_session(request.cookies, resp)
         return resp
 
-app.run(port=5000, host='0.0.0.0', debug=True)
+if __name__ == '__main__':
+    app.run(port=5000, host='0.0.0.0', debug=True)

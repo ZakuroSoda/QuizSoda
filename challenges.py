@@ -1,49 +1,24 @@
+import sqlite3
 import os
 
-class Challenge:
 
-    CHALLENGEID = 1
-    
-    def __init__(self, category, title, description, flag, points):
-        self.category, self.title, self.description, self.flag, self.points = category, title, description, flag, points
-
-        self.id = f'challenge-{Challenge.CHALLENGEID}'
-        Challenge.CHALLENGEID += 1
-
-        self.solves = 0
-
-    def create_card(self) -> str:
-        template = f"""
-<div class="col-sm mx-3">
-    <div class="card px-3" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">{self.title}</h5>
-            <p class="card-text">{self.points}</p>
-        </div>
-        <a href="" data-bs-toggle="modal" data-bs-target="#{self.id}" class="stretched-link"></a>
-    </div>
-</div>
-        """
-        return template
-        
-    def create_modal(self) -> str:
-        template = f"""
-<div class="modal fade" id="{self.id}" tabindex="-1" aria-hidden="true">
+MODAL_TEMPLATE = """
+<div class="modal fade" id="{id}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content rounded-4 shadow">
         <div class="modal-body p-5">
-          <h2 class="fw-bold mb-0">{self.title}</h2>
-          <h5>{self.points} points - {self.solves} solves</h5>
+          <h2 class="fw-bold mb-0">{title}</h2>
+          <h5>{points} points - {solves} solves</h5>
           <ul class="d-grid gap-4 my-4 list-unstyled">
             <li class="d-flex gap-4">
               <div>
-                {self.description}
+                {description}
               </div>
             </li>
           </ul>
           <div class="g-1 row">
             <div class="col-md-7">
-                <form action="/{self.id}" method="POST">
+                <form action="/{id}" method="POST">
                   <input type="text" class="form-control" id="answer" placeholder="answer" required> 
             </div>
             <div class="col-md-3">
@@ -59,148 +34,184 @@ class Challenge:
     </div>
 </div>
 """
-        return template
+CARD_TEMPLATE = """
+<div class="col-sm mx-3">
+    <div class="card px-3" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">{title}</h5>
+            <p class="card-text">{points}</p>
+        </div>
+        <a href="" data-bs-toggle="modal" data-bs-target="#{id}" class="stretched-link"></a>
+    </div>
+</div>
+"""
+MAIN_TEMPLATE = """
+{{% include 'baseHeadNoLogin.html' %}}
+<div class="container">
+{cards}
+{modals}
+</div>
+</body>
+</html>
+"""
 
-def initialise():
-    allChallenges = []
 
-    global categories
+def initDatabaseFromFiles():
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
     categories = os.listdir('./challenges')
+    for category in categories:
+        cur.execute(f"DROP TABLE IF EXISTS '{category}'")
+        cur.execute(f"CREATE TABLE '{category}' (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL, answer TEXT NOT NULL, points INTEGER NOT NULL, solves INTEGER NOT NULL DEFAULT 0)")
+        con.commit()
+        
+        challenges = os.listdir(f'./challenges/{category}')
+        for challenge in challenges:
+            title = challenge
+            description = open(f'./challenges/{category}/{challenge}/DESCRIPTION', 'r').read()
+            answer = open(f'./challenges/{category}/{challenge}/ANSWER', 'r').read()
+            points = int(open(f'./challenges/{category}/{challenge}/POINTS', 'r').read())
+            cur.execute(f"INSERT INTO '{category}' (title, description, answer, points) VALUES (?, ?, ?, ?)", (title, description, answer, points))
+            con.commit()
 
-    challengesPerCategory = {}
+### only run initDatabaseFromFiles() if you have edited the files in the challenges folder, otherwise you can just edit the database directly
+
+def createModalsFromDatabase():
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute("SELECT name FROM sqlite_schema WHERE name!='sqlite_sequence'")
+    categoriesRaw, categories = cur.fetchall(), []
+
+    for i in range(len(categoriesRaw)):
+        categories.append(categoriesRaw[i][0])
+    
+    all_modal_templates = """"""
 
     for category in categories:
-        challengeCounter = 1
-        for challenge in os.listdir(f'./challenges/{category}'):
-            try:
-                allChallenges.append(Challenge(
-                    category,
-                    challenge, 
-                    open(f'./challenges/{category}/{challenge}/DESCRIPTION', 'r').read(), 
-                    open(f'./challenges/{category}/{challenge}/FLAG', 'r').read(),
-                    int(open(f'./challenges/{category}/{challenge}/POINTS', 'r').read())
-                ))
-                challengesPerCategory[category] = challengeCounter
-                challengeCounter += 1
-            except Exception as e:
-                print(e)
+        cur.execute(f"SELECT id, title, description, points, solves FROM '{category}'")
+        challenges = cur.fetchall()
+        for challenge in challenges:
+            template = MODAL_TEMPLATE.format(
+                id=f"{category.replace(' ','_')}-{challenge[0]}",
+                title=challenge[1],
+                description=challenge[2],
+                points=challenge[3],
+                solves=challenge[4]
+            )
 
-    return allChallenges
+            all_modal_templates += template
 
-ALL_CHALLENGES = initialise()
+    return all_modal_templates
 
-def generate_page():
+def createCardsFromDatabase():
+    ### This is how the cards should be like
+    ### CATEGORY NAME
+    ### CARD 1 CARD 2 CARD 3
+    ### CARD 4 CARD 5 CARD 6
+    ### CARD 7 (blank col) (blank col)
 
-    ##### START OF CARD GENERATOR #####
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
 
-    ### Do not touch this disgusting code and solution ###
+    cur.execute("SELECT name FROM sqlite_schema WHERE name!='sqlite_sequence'")
+    categoriesRaw, categories = cur.fetchall(), []
 
-    cards, working = [], []
-    prevCategory = categories[0]
+    for i in range(len(categoriesRaw)):
+        categories.append(categoriesRaw[i][0])
+    
+    all_cards = []
 
-    for i in range(len(ALL_CHALLENGES)):
-        card = ALL_CHALLENGES[i].create_card()
-        working.append(card)
-
-        if i != len(ALL_CHALLENGES)-1:
-            if prevCategory != ALL_CHALLENGES[i+1].category:
-                prevCategory = ALL_CHALLENGES[i+1].category
-                cards.append(working)
-                working = []
-        else: #on the last chall
-            cards.append(working)
-            working = [] # not needed, for standardisation
-
-    ### This is how cards is organised: [[challenge with cat 1, challenge with cat 1], [challenge with cat 2, challenge with cat 2, challenge with cat 2]]
-    ### Do not touch this disgusting code and solution ###
-
-    ALL_CARDS = [] # not a constant but do I care
-    ALL_MODALS = [] # again idc
-
-    ### Generate Cards
     for i in range(len(categories)):
-        categorySTRING = f"""
+        all_cards.append([])
+
+        cur.execute(f"SELECT id, title, points FROM '{categories[i]}'")
+        challenges = cur.fetchall()
+
+        for challenge in challenges:
+            template = CARD_TEMPLATE.format(
+              id=f"{categories[i].replace(' ','_')}-{challenge[0]}",
+              title=challenge[1],
+              points=challenge[2]
+            )
+            all_cards[i].append(template)
+    
+    ### Start of UI row and column magic ###
+
+    all_categories_all_cards = []
+
+    for i in range(len(categories)):
+        categoryTitle = f"""
 <div class="row mx-3 my-5">
     <h1>Category: {categories[i]}</h1>
 </div>
-
-<div class="row my-5">
-"""        
-
-        cardsOfChallengesInThisCategory = cards[i]
+"""
         counter = 0
-        
-        # forgive me lord for I have sinned with this solution
-        indexOfBeginningOfLastRow = len(cardsOfChallengesInThisCategory)-(len(cardsOfChallengesInThisCategory)%3)
-        # what are my var names lmao
-        if indexOfBeginningOfLastRow == len(cardsOfChallengesInThisCategory):
-            indexOfBeginningOfLastRow = indexOfBeginningOfLastRow-3
-        
-        for j in range(len(cardsOfChallengesInThisCategory)):
+        categoryCardsAll = categoryTitle
 
-            categorySTRING += cardsOfChallengesInThisCategory[j] + '\n'
-            counter += 1
+        indexOfBeginningOfLastRow = len(all_cards[i])-(len(all_cards[i])%3)
+        if indexOfBeginningOfLastRow == len(all_cards[i]):
+            indexOfBeginningOfLastRow = indexOfBeginningOfLastRow-3
+
+        for j in range(len(all_cards[i])):
 
             if j == indexOfBeginningOfLastRow:
                 break
-            
-            if counter == 3:
-                categorySTRING += '</div>\n<div class="row my-5">'
-                counter = 0
-        
-        if (len(cardsOfChallengesInThisCategory) % 3) == 1:
 
-            categorySTRING += """
+            counter += 1
+
+            if counter == 1:
+                categoryCardsAll += '\n<div class="row my-5">\n'
+            
+            categoryCardsAll += all_cards[i][j]
+
+            if counter == 3:
+                categoryCardsAll += '\n</div>\n'
+                counter = 0
+            
+        if len(all_cards[i])%3 == 1:
+            categoryCardsAll += f"""
+<div class="row my-5">
+{all_cards[i][j]}
 <div class="col-sm mx-3"></div>
 <div class="col-sm mx-3"></div>
+
 </div>
 """
-        elif (len(cardsOfChallengesInThisCategory) % 3) == 2:
-            
-            categorySTRING += cardsOfChallengesInThisCategory[j+1] + '\n'
-            categorySTRING += """
+        elif len(all_cards[i])%3 == 2:
+            categoryCardsAll += f"""
+<div class="row my-5">
+{all_cards[i][j]}
+{all_cards[i][j+1]}
 <div class="col-sm mx-3"></div>
+
 </div>
 """
         else:
-            categorySTRING += cardsOfChallengesInThisCategory[j+1] + '\n'
-            categorySTRING += cardsOfChallengesInThisCategory[j+2] + '\n'
-            categorySTRING += '</div>\n'
-                
+            categoryCardsAll += f"""
+<div class="row my-5">
+{all_cards[i][j]}
+{all_cards[i][j+1]}
+{all_cards[i][j+2]}
 
-        ALL_CARDS.append(categorySTRING)
-
-    ##### END OF CARD GENERATOR #####
-
-    ##### START OF MODAL GENERATOR #####
-    for i in range(len(ALL_CHALLENGES)):
-        modal = ALL_CHALLENGES[i].create_modal()
-        ALL_MODALS.append(modal)
-    ##### END OF MODAL GENERATOR
-    
-    ##### START FINAL ASSEMBLY #####
-    START = """
-{% include 'baseHeadNoLogin.html' %}
-<div class="container">
-"""
-    END = """
 </div>
-</body>
-</html>    
 """
+        all_categories_all_cards.append(categoryCardsAll)
 
-    FINAL = START
+    return all_categories_all_cards
 
-    for categoryCards in ALL_CARDS:
-        FINAL += categoryCards
-    for modal in ALL_MODALS:
-        FINAL += modal
+def assembleChallengePage():
+    ALL_CATEGORIES_ALL_CARDS = createCardsFromDatabase()
+    ALL_MODAL_TEMPLATES = createModalsFromDatabase()
 
-    FINAL += END
+    ALL_CARD_TEMPLATES = """"""
+    for category in ALL_CATEGORIES_ALL_CARDS:
+        ALL_CARD_TEMPLATES += category
+    #This joins all the cards (separated by category) into one long string
 
-    generatedTemplate = open("./templates/generatedTemplate.html", "w")
-    generatedTemplate.write(FINAL)
-    generatedTemplate.close()
-
-if __name__ == '__main__':
-    generate_page()
+    FINAL = MAIN_TEMPLATE.format(
+      cards=ALL_CARD_TEMPLATES,
+      modals=ALL_MODAL_TEMPLATES
+    )
+    
+    return FINAL

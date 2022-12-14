@@ -1,6 +1,6 @@
 from flask import Flask, render_template, render_template_string, redirect, url_for, make_response, request
 from auth import SessionManager, AccountManager
-from challenges import assembleChallengePage, initDatabaseFromFiles
+from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer
 
 app = Flask(__name__)
 
@@ -67,6 +67,24 @@ def challenge():
         webpage = assembleChallengePage()
         resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True))
         return resp
+
+@app.route('/challenges/<challengeID>', methods=['POST'])
+def submitAnswer(challengeID):
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False: #if not logged in or if sessionID is wrong
+        return redirect(url_for('login'))
+    else: # if logged in
+        username = loggedIn
+        answer = request.form['answer']
+        pointsToAdd = checkAnswer(challengeID, answer) # interacts with challenge db
+
+        if pointsToAdd != 0:
+            account = AccountManager('./db/database.db') # interacts with user db
+            account.add_points(username, pointsToAdd)
+
+            return 'correct' 
+        else:
+            return 'test'
 
 @app.route('/account')
 def account():

@@ -17,7 +17,7 @@ class SessionManager:
                 break
         self.cur.execute('INSERT INTO sessions VALUES (?, ?)', (username, token))
         self.con.commit()
-        response.set_cookie('SESSIONID', token)
+        response.set_cookie('SESSIONID', value=token, max_age=30*60*60*24) # 30 days
         return response
     
     def get_session(self, cookies):
@@ -115,3 +115,9 @@ class AccountManager:
         resp = make_response(redirect(url_for('index')))
         resp = session.create_session(username, resp)
         return resp
+    
+    def add_points(self, username: str, points: int) -> None:
+        self.cur.execute("SELECT points FROM users WHERE username=?", (username,))
+        currentPoints = self.cur.fetchall()[0][0]
+        self.cur.execute('UPDATE users SET points=? WHERE username=?', (currentPoints + points, username))
+        self.con.commit()

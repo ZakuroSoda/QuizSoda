@@ -18,8 +18,8 @@ MODAL_TEMPLATE = """
           </ul>
           <div class="g-1 row">
             <div class="col-md-7">
-                <form action="/{id}" method="POST">
-                  <input type="text" class="form-control" id="answer" placeholder="answer" required> 
+                <form action="/challenges/{id}" method="POST">
+                  <input name="answer" type="text" class="form-control" id="answer" placeholder="answer" required> 
             </div>
             <div class="col-md-3">
                   <button type="submit" style="width: 100%;" class="btn btn-outline-primary">Submit</button>
@@ -215,3 +215,24 @@ def assembleChallengePage():
     )
     
     return FINAL
+
+def checkAnswer(id, answer):
+    # the id will be in the format of category-challengeid
+    # for example: web-1 or binary_exploitation-2
+
+    category, challengeid = id.split('-')[0].replace('_',' '), id.split('-')[1]
+
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute(f"SELECT answer, points FROM '{category}' WHERE id=?", (challengeid,))
+    result = cur.fetchone()
+    correctAnswer, points = result[0], result[1]
+
+    if answer == correctAnswer:
+        cur.execute(f"UPDATE {category} SET solves=solves+1 WHERE id=?", (challengeid,))
+        con.commit()
+
+        return points
+    else:
+        return 0

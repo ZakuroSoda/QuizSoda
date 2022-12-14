@@ -89,4 +89,5 @@ def logout():
         return resp
 
 if __name__ == '__main__':
+    initDatabaseFromFiles() # ONLY RUN THIS IF YOU INTEND TO INITIALISE THE DATABASE FROM YOUR CHALLENGES DIRECTORY EVERY TIME!
     app.run(port=5000, host='0.0.0.0', debug=True)

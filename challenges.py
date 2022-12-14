@@ -125,7 +125,7 @@ def createCardsFromDatabase():
     for i in range(len(categories)):
         all_cards.append([])
 
-        cur.execute(f"SELECT id, title, points FROM '{categories[i]}'")
+        cur.execute(f"SELECT id, title, points FROM '{categories[i]}' ORDER BY points")
         challenges = cur.fetchall()
 
         for challenge in challenges:

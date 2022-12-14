@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, render_template_string, redirect, url_for, make_response, request
 from auth import SessionManager, AccountManager
+from challenges import assembleChallengePage, initDatabaseFromFiles
 
 app = Flask(__name__)
 
@@ -63,7 +64,9 @@ def challenge():
     if loggedIn == False: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
     else: # if logged in
-        return render_template('generatedTemplate.html', navBarPage="challenges", authenticated=True)
+        webpage = assembleChallengePage()
+        resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True))
+        return resp
 
 @app.route('/account')
 def account():

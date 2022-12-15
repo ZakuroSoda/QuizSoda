@@ -82,6 +82,8 @@ def submitAnswer(challengeID):
         allowed = account.checkAllowSubmit(username, challengeID) # interacts with user db
         pointsToAdd = checkAnswer(challengeID, answer) # interacts with challenge db
         
+        ### Will work on front-end appearance later ###
+
         if pointsToAdd != 0: # if answer is correct
             if allowed: # if user has not already solved this challenge
                 account.addPoints(username, pointsToAdd) # interacts with user db
@@ -92,9 +94,11 @@ def submitAnswer(challengeID):
                 return "correct"
 
             else: # not required, for readability
-                return "already solved" 
+                return "already solved but correct" 
         else:
             return 'wrong'
+
+        ### Will work on front-end appearance later ###
 
 @app.route('/account')
 def account():
@@ -103,9 +107,11 @@ def account():
         return redirect(url_for('login'))
     else:
         username = loggedIn
-        
-    return render_template('account.html', navBarPage="account", authenticated=True, username=username) # TEST VALUES MISSING: placing, points
+        account = AccountManager('./db/database.db')
+        points = account.getPoints(username)
 
+    return render_template('account.html', navBarPage="account", authenticated=True, username=username, points=points) # TEST VALUES MISSING: placing
+    
 @app.route('/logout')
 def logout():
     loggedIn = checkLoggedIn(request)
@@ -117,5 +123,5 @@ def logout():
         return resp
 
 if __name__ == '__main__':
-    initDatabaseFromFiles() # ONLY RUN THIS IF YOU INTEND TO INITIALISE THE DATABASE FROM YOUR CHALLENGES DIRECTORY EVERY TIME!
+    # initDatabaseFromFiles() # ONLY RUN THIS IF YOU INTEND TO INITIALISE THE DATABASE FROM YOUR CHALLENGES DIRECTORY EVERY TIME!
     app.run(port=5000, host='0.0.0.0', debug=True)

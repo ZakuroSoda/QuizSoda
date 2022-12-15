@@ -142,3 +142,7 @@ class AccountManager:
 
         self.cur.execute('UPDATE users SET solvedChallenges=? WHERE username=?', (result, username))
         self.con.commit()
+    
+    def getPoints(self, username: str) -> int:
+        self.cur.execute("SELECT points FROM users WHERE username=?", (username,))
+        return self.cur.fetchall()[0][0]

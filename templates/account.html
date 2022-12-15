@@ -9,7 +9,7 @@
                 <li class="d-flex gap-4">
                     <img src="{{ url_for('static', filename='points.png') }}" class="bi text-muted flex-shrink-0" width="48" height="48">
                     <div>
-                        <h4 class="mb-0">{% if not points %}none{% endif %}{% if points %}{{points}}{% endif %} Points</h4>
+                        <h4 class="mb-0">{% if not points %}0{% endif %}{% if points %}{{points}}{% endif %} Points</h4>
                     </div>
                 </li>
                 <li class="d-flex gap-4">

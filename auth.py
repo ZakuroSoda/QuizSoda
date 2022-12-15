@@ -1,4 +1,5 @@
 import sqlite3, flask
+import json
 from uuid import uuid4
 from hashlib import sha256
 from flask import make_response, render_template, redirect, url_for
@@ -116,8 +117,28 @@ class AccountManager:
         resp = session.create_session(username, resp)
         return resp
     
-    def add_points(self, username: str, points: int) -> None:
+    def checkAllowSubmit(self, username: str, challengeID: int) -> bool:
+        self.cur.execute("SELECT solvedChallenges FROM users where username=?", (username,))
+        result = self.cur.fetchall()[0][0]
+        result = json.loads(result)
+        if challengeID in result:
+            return False
+        else:
+            return True
+
+    def addPoints(self, username: str, points: int) -> None:
         self.cur.execute("SELECT points FROM users WHERE username=?", (username,))
         currentPoints = self.cur.fetchall()[0][0]
         self.cur.execute('UPDATE users SET points=? WHERE username=?', (currentPoints + points, username))
+        self.con.commit()    
+    
+    def addSolvedChallenge(self, username: str, challengeID: str) -> None:
+        self.cur.execute("SELECT solvedChallenges FROM users where username=?", (username,))
+        result = self.cur.fetchall()[0][0]
+        
+        result = json.loads(result)
+        result.append(challengeID)
+        result = json.dumps(result)
+
+        self.cur.execute('UPDATE users SET solvedChallenges=? WHERE username=?', (result, username))
         self.con.commit()

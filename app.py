@@ -1,6 +1,6 @@
 from flask import Flask, render_template, render_template_string, redirect, url_for, make_response, request
 from auth import SessionManager, AccountManager
-from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer
+from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer, updateChallengeSolves
 
 app = Flask(__name__)
 
@@ -73,18 +73,28 @@ def submitAnswer(challengeID):
     loggedIn = checkLoggedIn(request)
     if loggedIn == False: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
+
     else: # if logged in
         username = loggedIn
         answer = request.form['answer']
+
+        account = AccountManager('./db/database.db') # interacts with user db
+        allowed = account.checkAllowSubmit(username, challengeID) # interacts with user db
         pointsToAdd = checkAnswer(challengeID, answer) # interacts with challenge db
+        
+        if pointsToAdd != 0: # if answer is correct
+            if allowed: # if user has not already solved this challenge
+                account.addPoints(username, pointsToAdd) # interacts with user db
+                account.addSolvedChallenge(username, challengeID) # interacts with user db
 
-        if pointsToAdd != 0:
-            account = AccountManager('./db/database.db') # interacts with user db
-            account.add_points(username, pointsToAdd)
+                updateChallengeSolves(challengeID) # interacts with challenge db
 
-            return 'correct' 
+                return "correct"
+
+            else: # not required, for readability
+                return "already solved" 
         else:
-            return 'test'
+            return 'wrong'
 
 @app.route('/account')
 def account():

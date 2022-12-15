@@ -230,9 +230,15 @@ def checkAnswer(id, answer):
     correctAnswer, points = result[0], result[1]
 
     if answer == correctAnswer:
-        cur.execute(f"UPDATE {category} SET solves=solves+1 WHERE id=?", (challengeid,))
-        con.commit()
-
         return points
     else:
         return 0
+
+def updateChallengeSolves(id):
+    category, challengeid = id.split('-')[0].replace('_',' '), id.split('-')[1]
+
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute(f"UPDATE '{category}' SET solves=solves+1 WHERE id=?", (challengeid,))
+    con.commit()

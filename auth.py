@@ -103,7 +103,7 @@ class AccountManager:
             return resp
         
         try:
-            self.cur.execute("INSERT INTO users VALUES(?, ?)", (username, passwordHash))
+            self.cur.execute("INSERT INTO users (username, password) VALUES(?, ?)", (username, passwordHash))
             self.con.commit()
 
         except Exception as e:
@@ -146,3 +146,11 @@ class AccountManager:
     def getPoints(self, username: str) -> int:
         self.cur.execute("SELECT points FROM users WHERE username=?", (username,))
         return self.cur.fetchall()[0][0]
+    
+    def getPlacing(self, username: str) -> int:
+        self.cur.execute("SELECT username FROM users ORDER BY points DESC")
+        results = self.cur.fetchall()
+        for i in range(len(results)):
+            if results[i][0] == username:
+                return i + 1
+        return -1 # if error

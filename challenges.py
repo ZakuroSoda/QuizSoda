@@ -48,11 +48,18 @@ CARD_TEMPLATE = """
 MAIN_TEMPLATE = """
 {{% include 'baseHeadNoLogin.html' %}}
 <div class="container">
+{alerts}
 {cards}
 {modals}
 </div>
 </body>
 </html>
+"""
+ALERT_TEMPLATE = """
+<div class="alert alert-{{alertType}} alert-dismissible my-5" role="alert" {% if not alertType %}hidden{% endif %}>
+    <div>{{alertMessage}}</div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 """
 
 
@@ -211,7 +218,8 @@ def assembleChallengePage():
 
     FINAL = MAIN_TEMPLATE.format(
       cards=ALL_CARD_TEMPLATES,
-      modals=ALL_MODAL_TEMPLATES
+      modals=ALL_MODAL_TEMPLATES,
+      alerts=ALERT_TEMPLATE
     )
     
     return FINAL
@@ -242,3 +250,17 @@ def updateChallengeSolves(id):
 
     cur.execute(f"UPDATE '{category}' SET solves=solves+1 WHERE id=?", (challengeid,))
     con.commit()
+
+def resetChallengeSolves():
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute("SELECT name FROM sqlite_schema WHERE name!='sqlite_sequence'")
+    categoriesRaw, categories = cur.fetchall(), []
+
+    for i in range(len(categoriesRaw)):
+        categories.append(categoriesRaw[i][0])
+
+    for category in categories:
+        cur.execute(f"UPDATE '{category}' SET solves=0")
+        con.commit()

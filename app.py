@@ -81,8 +81,6 @@ def submitAnswer(challengeID):
         account = AccountManager('./db/database.db') # interacts with user db
         allowed = account.checkAllowSubmit(username, challengeID) # interacts with user db
         pointsToAdd = checkAnswer(challengeID, answer) # interacts with challenge db
-        
-        ### Will work on front-end appearance later ###
 
         if pointsToAdd != 0: # if answer is correct
             if allowed: # if user has not already solved this challenge
@@ -91,14 +89,18 @@ def submitAnswer(challengeID):
 
                 updateChallengeSolves(challengeID) # interacts with challenge db
 
-                return "correct"
+                webpage = assembleChallengePage()
+                resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="success", alertMessage="The answer you submitted is correct!"))
+                return resp
 
             else: # not required, for readability
-                return "already solved but correct" 
+                webpage = assembleChallengePage()
+                resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="warning", alertMessage="Correct, but no resubmitting!"))
+                return resp
         else:
-            return 'wrong'
-
-        ### Will work on front-end appearance later ###
+            webpage = assembleChallengePage()
+            resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="danger", alertMessage="The answer you submitted is wrong!"))
+            return resp
 
 @app.route('/account')
 def account():
@@ -109,8 +111,9 @@ def account():
         username = loggedIn
         account = AccountManager('./db/database.db')
         points = account.getPoints(username)
+        placing = account.getPlacing(username)
 
-    return render_template('account.html', navBarPage="account", authenticated=True, username=username, points=points) # TEST VALUES MISSING: placing
+    return render_template('account.html', navBarPage="account", authenticated=True, username=username, points=points, placing=placing)
     
 @app.route('/logout')
 def logout():

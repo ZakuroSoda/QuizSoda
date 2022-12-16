@@ -4,6 +4,19 @@ from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer
 
 app = Flask(__name__)
 
+def resetAll():
+    ''' DANGEROUS USE WITH CAUTION'''
+    # reloads the CHALLENGE database from the CHALLENGES directory
+    initDatabaseFromFiles()
+    # REMOVES ALL SESSIONS
+    session = SessionManager('./db/database.db')
+    session.reset_sessions()
+    # REMOVES ALL POINTS AND ALL SOLVE RECORDS PER USER
+    account = AccountManager('./db/database.db')
+    account.resetUserSolves()
+    # REMOVES ALL USERS
+    account.deleteAllUsers()
+
 def checkLoggedIn(request):
     session = SessionManager('./db/database.db')
     check = session.get_session(request.cookies)
@@ -126,5 +139,5 @@ def logout():
         return resp
 
 if __name__ == '__main__':
-    # initDatabaseFromFiles() # ONLY RUN THIS IF YOU INTEND TO INITIALISE THE DATABASE FROM YOUR CHALLENGES DIRECTORY EVERY TIME!
+    # run resetAll() to reset everything
     app.run(port=5000, host='0.0.0.0', debug=True)

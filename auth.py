@@ -42,6 +42,10 @@ class SessionManager:
         self.con.commit()
         response.set_cookie('SESSIONID', '', expires=0)
         return response
+    
+    def reset_sessions(self):
+        self.cur.execute('DELETE FROM sessions')
+        self.con.commit()
 
 class AccountManager:
     def __init__(self, instance):
@@ -154,3 +158,12 @@ class AccountManager:
             if results[i][0] == username:
                 return i + 1
         return -1 # if error
+    
+    def resetUserSolves(self):
+        self.cur.execute("UPDATE users SET solvedChallenges='[]'")
+        self.cur.execute("UPDATE users SET points=0")
+        self.con.commit()
+    
+    def deleteAllUsers(self):
+        self.cur.execute("DELETE FROM users")
+        self.con.commit()

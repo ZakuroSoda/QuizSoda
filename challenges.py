@@ -36,7 +36,7 @@ MODAL_TEMPLATE = """
 """
 CARD_TEMPLATE = """
 <div class="col-sm mx-3">
-    <div class="card px-3" style="width: 18rem;">
+    <div class="card px-3" style="width: 18rem;" {{% if '{id}' in solvedChallenges %}}solved{{% endif %}}>
         <div class="card-body">
             <h5 class="card-title">{title}</h5>
             <p class="card-text">{points}</p>

@@ -159,6 +159,10 @@ class AccountManager:
                 return i + 1
         return -1 # if error
     
+    def getSolvedChallenges(self, username: str) -> list:
+        self.cur.execute("SELECT solvedChallenges FROM users WHERE username=?", (username,))
+        return json.loads(self.cur.fetchall()[0][0])
+
     def resetUserSolves(self):
         self.cur.execute("UPDATE users SET solvedChallenges='[]'")
         self.cur.execute("UPDATE users SET points=0")

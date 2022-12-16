@@ -2,28 +2,10 @@ from flask import Flask, render_template, render_template_string, redirect, url_
 from auth import SessionManager, AccountManager
 from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer, updateChallengeSolves
 
+from custom_methods import resetAll, checkLoggedIn, fullAssembleChallengePage
+
 app = Flask(__name__)
 
-def resetAll():
-    ''' DANGEROUS USE WITH CAUTION'''
-    # reloads the CHALLENGE database from the CHALLENGES directory
-    initDatabaseFromFiles()
-    # REMOVES ALL SESSIONS
-    session = SessionManager('./db/database.db')
-    session.reset_sessions()
-    # REMOVES ALL POINTS AND ALL SOLVE RECORDS PER USER
-    account = AccountManager('./db/database.db')
-    account.resetUserSolves()
-    # REMOVES ALL USERS
-    account.deleteAllUsers()
-
-def checkLoggedIn(request):
-    session = SessionManager('./db/database.db')
-    check = session.get_session(request.cookies)
-    if check == None: #if not logged in or if sessionID is wrong
-        return False
-    else:
-        return check
 
 @app.route('/')
 def index():
@@ -77,8 +59,7 @@ def challenge():
     if loggedIn == False: #if not logged in or if sessionID is wrong
         return redirect(url_for('login'))
     else: # if logged in
-        webpage = assembleChallengePage()
-        resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True))
+        resp = fullAssembleChallengePage(loggedIn)
         return resp
 
 @app.route('/challenges/<challengeID>', methods=['POST'])
@@ -102,17 +83,15 @@ def submitAnswer(challengeID):
 
                 updateChallengeSolves(challengeID) # interacts with challenge db
 
-                webpage = assembleChallengePage()
-                resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="success", alertMessage="The answer you submitted is correct!"))
+                resp = fullAssembleChallengePage(username, alertType="success", alertMessage="The answer you submitted is correct!")
                 return resp
 
             else: # not required, for readability
-                webpage = assembleChallengePage()
-                resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="warning", alertMessage="Correct, but no resubmitting!"))
+                resp = fullAssembleChallengePage(username, alertType="warning", alertMessage="Correct, but no resubmitting!")
                 return resp
-        else:
-            webpage = assembleChallengePage()
-            resp = make_response(render_template_string(webpage, navBarPage="challenges", authenticated=True, alertType="danger", alertMessage="The answer you submitted is wrong!"))
+                
+        else: # if answer is wrong
+            resp = fullAssembleChallengePage(username, alertType="danger", alertMessage="The answer you submitted is wrong!")
             return resp
 
 @app.route('/account')

@@ -162,6 +162,10 @@ class AccountManager:
     def getSolvedChallenges(self, username: str) -> list:
         self.cur.execute("SELECT solvedChallenges FROM users WHERE username=?", (username,))
         return json.loads(self.cur.fetchall()[0][0])
+    
+    def getLeaderboard(self) -> list:
+        self.cur.execute("SELECT username, points FROM users ORDER BY points DESC")
+        return self.cur.fetchall()
 
     def resetUserSolves(self):
         self.cur.execute("UPDATE users SET solvedChallenges='[]'")

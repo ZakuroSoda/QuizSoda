@@ -89,7 +89,7 @@ def submitAnswer(challengeID):
             else: # not required, for readability
                 resp = fullAssembleChallengePage(username, alertType="warning", alertMessage="Correct, but no resubmitting!")
                 return resp
-                
+
         else: # if answer is wrong
             resp = fullAssembleChallengePage(username, alertType="danger", alertMessage="The answer you submitted is wrong!")
             return resp
@@ -116,6 +116,17 @@ def logout():
         resp = make_response(redirect(url_for('index')))
         resp = SessionManager('./db/database.db').remove_session(request.cookies, resp)
         return resp
+
+@app.route('/leaderboard')
+def leaderboard():
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False: #if not logged in or if sessionID is wrong
+        return redirect(url_for('login'))
+    else:
+        account = AccountManager('./db/database.db')
+        leaderboard = account.getLeaderboard()
+
+        return render_template('leaderboard.html', navBarPage="leaderboard", authenticated=True, username=loggedIn, leaderboard=leaderboard)
 
 if __name__ == '__main__':
     # run resetAll() to reset everything

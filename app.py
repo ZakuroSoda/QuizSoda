@@ -129,5 +129,5 @@ def leaderboard():
         return render_template('leaderboard.html', navBarPage="leaderboard", authenticated=True, username=loggedIn, leaderboard=leaderboard)
 
 if __name__ == '__main__':
-    # run resetAll() to reset everything
+    resetAll()
     app.run(port=5000, host='0.0.0.0', debug=True)

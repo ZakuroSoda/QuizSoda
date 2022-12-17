@@ -1,0 +1,7 @@
+It is a high-level, interpreted language.
+It is dynamically typed, meaning that variables do not have a fixed type and can hold values of different types at different times.
+It is known for its simplicity and readability, with an emphasis on whitespace and indentation to structure code.
+It is often used for web development, scripting, and data analysis.
+It has a large standard library and a large developer community.
+<br>
+Wrap your answer in flag{}

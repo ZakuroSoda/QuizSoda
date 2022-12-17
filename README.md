@@ -2,13 +2,30 @@
 
 <img src='static/logo.png' width=100px>  
 
-Hello there! QuizSoda is meant to be a highly simplified quiz/CTF platform.  
+Hello there! QuizSoda is a highly simplified quiz/CTF platform.  
 
-We are written in flask, with all of our storage done with SQLite.
+Written in:
+- Frontend: Bootstrap
+- Backend: Flask
+- Language: Python
+- DB: SQL (SQLite)
 
-We are still in development.
+We have reached beta stage.
 
-# Challenge Upload Guide
+## Documentation
+
+None. Zero docs. Go figure it out yourself.
+
+```python
+if __name__ == '__main__':
+    # resetAll()
+    app.run(port=5000, host='0.0.0.0', debug=True)
+```
+
+Setup: Follow the challenge upload guide and then uncomment `resetAll()`.  
+Once done, you can comment it out again. (Up to you: anyway debug is still on...)
+
+### Challenge Upload Guide
 
 Upload challenges with the following format.
 
@@ -18,11 +35,10 @@ Upload challenges with the following format.
         └── challenge name
             ├── DESCRIPTION
             ├── FLAG
-            ├── POINTS (only if dynamic scoring fails)
-            ├── HINTS (optional) [NOT FUNCTIONAL YET]
-            └── dist
-                └── files to be released (no folders allowed, please zip archive if needed)
+            └── POINTS
+     ├── category
+        └── challenge name
+            ├── DESCRIPTION
+            ├── FLAG
+            └── POINTS
 ```
-
-> Apologies but for now no distribution of files and web challenges are functional.  
-> After all this is a quiz platform!

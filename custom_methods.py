@@ -1,9 +1,11 @@
 from flask import render_template_string, make_response
 from auth import SessionManager, AccountManager
-from challenges import assembleChallengePage, initDatabaseFromFiles
+from challenges import assembleChallengePage, initDatabaseFromFiles, dropAllTables
 
 def resetAll():
     ''' DANGEROUS USE WITH CAUTION'''
+    # REMOVES ALL CATEGORIES AND CHALLENGES
+    dropAllTables()
     # reloads the CHALLENGE database from the CHALLENGES directory, clears solves per challenge
     initDatabaseFromFiles()
     # REMOVES ALL SESSIONS

@@ -264,3 +264,17 @@ def resetChallengeSolves():
     for category in categories:
         cur.execute(f"UPDATE '{category}' SET solves=0")
         con.commit()
+
+def dropAllTables():
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute("SELECT name FROM sqlite_schema")
+    categoriesRaw, categories = cur.fetchall(), []
+
+    for i in range(len(categoriesRaw)):
+        categories.append(categoriesRaw[i][0])
+    
+    for category in categories:
+        cur.execute(f"DROP TABLE IF EXISTS '{category}'")
+        con.commit()

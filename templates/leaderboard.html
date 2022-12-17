@@ -1,17 +1,30 @@
 {% include 'baseHeadNoLogin.html' %}
 <div class="container">
+
     <h1 class="display-3 mx-4 my-4"><br>
         Leaderboard
         <small class="text-muted">Keep grinding!</small>
     </h1>
-    <div class="list-group list-group-flush mx-4 my-5">
-        {% for user in leaderboard %}
-        <a class="list-group-item {% if username == user[0] %}list-group-item-primary{% endif %}" aria-current="true">
-            <h4 style="display: inline;" class="me-5">{{ user[0] }}</h4>
-            <span class="badge bg-success rounded-pill">{{ user[1] }} points</span>
-        </a>
-        {% endfor %}
-    </div>
+
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width:15%" scope="col">Place</th>
+            <th style="width:65%"scope="col">Username</th>
+            <th style="width:20%"scope="col">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for user in leaderboard %}
+            <tr {% if username == user[0] %}class="table-primary"{% endif %}>
+                <th scope="row">{{ loop.index }}</th>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+      
 </div>
 </body>
 </html>

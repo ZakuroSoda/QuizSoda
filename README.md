@@ -35,10 +35,22 @@ Upload challenges with the following format.
         └── challenge name
             ├── DESCRIPTION
             ├── FLAG
-            └── POINTS
+            ├── POINTS
+            └── dist.zip (optional)
      ├── category
         └── challenge name
             ├── DESCRIPTION
             ├── FLAG
             └── POINTS
 ```
+
+### Gallery
+
+<img src="./docs/home.PNG">
+<img src="./docs/register.PNG">
+<img src="./docs/login.PNG">
+<img src="./docs/ChallengesBefore.PNG">
+<img src="./docs/ChallengesAfter.PNG">
+<img src="./docs/ChallengeModal.PNG">
+<img src="./docs/Leaderboard.PNG">
+<img src="./docs/Account.PNG">

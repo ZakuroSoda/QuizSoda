@@ -1,7 +1,11 @@
 import sqlite3
 import os
 
-
+DOWNLOAD_FILE_TEMPLATE = """
+<div class="g-1 row my-4">
+    <a href="/files/{id}" style="width: 100%;" class="btn btn-outline-info" download>Download Challenge Files</a>
+</div>
+"""
 MODAL_TEMPLATE = """
 <div class="modal fade" id="{id}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -16,6 +20,7 @@ MODAL_TEMPLATE = """
               </div>
             </li>
           </ul>
+          {file_template}
           <div class="g-1 row">
             <div class="col-md-7">
                 <form action="/challenges/{id}" method="POST">
@@ -62,14 +67,13 @@ ALERT_TEMPLATE = """
 </div>
 """
 
-
 def initDatabaseFromFiles():
     con = sqlite3.connect('./db/challenges.db')
     cur = con.cursor()
     categories = os.listdir('./challenges')
     for category in categories:
         cur.execute(f"DROP TABLE IF EXISTS '{category}'")
-        cur.execute(f"CREATE TABLE '{category}' (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL, answer TEXT NOT NULL, points INTEGER NOT NULL, solves INTEGER NOT NULL DEFAULT 0)")
+        cur.execute(f"CREATE TABLE '{category}' (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL, answer TEXT NOT NULL, points INTEGER NOT NULL, solves INTEGER NOT NULL DEFAULT 0, files BIT NOT NULL DEFAULT 0)")
         con.commit()
         
         challenges = os.listdir(f'./challenges/{category}')
@@ -80,6 +84,10 @@ def initDatabaseFromFiles():
             points = int(open(f'./challenges/{category}/{challenge}/POINTS', 'r').read())
             cur.execute(f"INSERT INTO '{category}' (title, description, answer, points) VALUES (?, ?, ?, ?)", (title, description, answer, points))
             con.commit()
+
+            if os.path.isfile(f'./challenges/{category}/{challenge}/dist.zip'):
+                cur.execute(f"UPDATE '{category}' SET files=1 WHERE title=?", (title,))
+                con.commit()
 
 ### only run initDatabaseFromFiles() if you have edited the files in the challenges folder, otherwise you can just edit the database directly
 
@@ -96,7 +104,7 @@ def createModalsFromDatabase():
     all_modal_templates = """"""
 
     for category in categories:
-        cur.execute(f"SELECT id, title, description, points, solves FROM '{category}'")
+        cur.execute(f"SELECT id, title, description, points, solves, files FROM '{category}'")
         challenges = cur.fetchall()
         for challenge in challenges:
             template = MODAL_TEMPLATE.format(
@@ -104,8 +112,14 @@ def createModalsFromDatabase():
                 title=challenge[1],
                 description=challenge[2],
                 points=challenge[3],
-                solves=challenge[4]
+                solves=challenge[4],
+                file_template="{file_template}"
             )
+
+            if challenge[5] == 1:
+                template = template.replace("{file_template}", DOWNLOAD_FILE_TEMPLATE.format(id=f"{category.replace(' ','_')}-{challenge[0]}"))
+            else:
+                template = template.replace("{file_template}", "")
 
             all_modal_templates += template
 
@@ -250,6 +264,21 @@ def updateChallengeSolves(id):
 
     cur.execute(f"UPDATE '{category}' SET solves=solves+1 WHERE id=?", (challengeid,))
     con.commit()
+
+def getFileLocation(id):
+    category, challengeid = id.split('-')[0].replace('_',' '), id.split('-')[1]
+
+    con = sqlite3.connect('./db/challenges.db')
+    cur = con.cursor()
+
+    cur.execute(f"SELECT title FROM '{category}' WHERE id=? AND files=1", (challengeid,))
+
+    try: 
+        title = cur.fetchone()[0]
+        path = f"./challenges/{category}/{title}/dist.zip"
+        return path
+    except:
+        return None
 
 def resetChallengeSolves():
     con = sqlite3.connect('./db/challenges.db')

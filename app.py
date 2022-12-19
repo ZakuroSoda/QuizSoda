@@ -1,6 +1,6 @@
-from flask import Flask, render_template, render_template_string, redirect, url_for, make_response, request
+from flask import Flask, render_template, render_template_string, redirect, url_for, make_response, send_file, request
 from auth import SessionManager, AccountManager
-from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer, updateChallengeSolves
+from challenges import assembleChallengePage, initDatabaseFromFiles, checkAnswer, updateChallengeSolves, getFileLocation
 
 from custom_methods import resetAll, checkLoggedIn, fullAssembleChallengePage
 
@@ -93,6 +93,18 @@ def submitAnswer(challengeID):
         else: # if answer is wrong
             resp = fullAssembleChallengePage(username, alertType="danger", alertMessage="The answer you submitted is wrong!")
             return resp
+
+@app.route('/files/<challengeID>')
+def downloadFile(challengeID):
+    loggedIn = checkLoggedIn(request)
+    if loggedIn == False:
+        return redirect(url_for('login'))
+    else:
+        location = getFileLocation(challengeID)
+        if location != None:
+            return send_file(location, as_attachment=True)
+        else:
+            return "file does not exist: spurious request?"
 
 @app.route('/account')
 def account():

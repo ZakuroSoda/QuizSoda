@@ -4,9 +4,7 @@
 
 Hello there! QuizSoda is a highly simplified quiz/CTF platform.  
 
-<img src="https://img.shields.io/badge/Stage-Beta-60B932?style=plastic">
-<img src="https://img.shields.io/badge/-Flask%202.2.x-black?logo=flask&style=plastic">
-<img src="https://img.shields.io/badge/-SQLite%203.x-003B57?logo=SQLite&style=plastic">
+<img src="https://img.shields.io/badge/Stage-Beta-60B932?style=plastic"><img src="https://img.shields.io/badge/-Flask%202.2.x-black?logo=flask&style=plastic"><img src="https://img.shields.io/badge/-SQLite%203.x-003B57?logo=SQLite&style=plastic">
 
 ---
 

@@ -51,7 +51,7 @@ CARD_TEMPLATE = """
 </div>
 """
 MAIN_TEMPLATE = """
-{{% include 'baseHeadNoLogin.html' %}}
+{{% include 'basehead.html' %}}
 <div class="container">
 {alerts}
 {cards}

@@ -19,12 +19,14 @@
             </a>
           <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
+              {% if authenticated %}
               <li class="nav-item">
                 <a class="nav-link {% if navBarPage=='challenges' %} active {% endif %}" href="/challenges">Challenges</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if navBarPage=='leaderboard' %} active {% endif %}" href="/leaderboard">Leaderboard</a>
               </li>
+              {% endif %}
             </ul>
             <ul class="navbar-nav ml-auto">
               {% if not authenticated %}

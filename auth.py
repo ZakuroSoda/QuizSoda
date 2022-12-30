@@ -4,6 +4,27 @@ from uuid import uuid4
 from hashlib import sha256
 from flask import make_response, render_template, redirect, url_for
 
+def setupUserDB():
+    con = sqlite3.connect('./db/database.db')
+    cur = con.cursor()
+
+    cur.execute('DROP TABLE IF EXISTS users')
+    cur.execute('''CREATE TABLE users (
+        username TEXT NOT NULL, 
+        password TEXT NOT NULL, 
+        points INTEGER NOT NULL DEFAULT 0,
+        solvedChallenges TEXT NOT NULL DEFAULT '[]'
+        )''')
+    con.commit()
+
+    cur.execute('DROP TABLE IF EXISTS sessions')
+    cur.execute('''CREATE TABLE sessions (
+        username TEXT NOT NULL,
+        token TEXT NOT NULL
+        )''')
+    con.commit()
+
+
 class SessionManager:
     def __init__(self, instance):
         self.con = sqlite3.connect(f'{instance}')

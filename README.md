@@ -18,16 +18,15 @@ We have reached beta stage.
 
 ## Documentation
 
-None. Zero docs. Go figure it out yourself.
-
-```python
-if __name__ == '__main__':
-    # resetAll()
-    app.run(port=5000, host='0.0.0.0', debug=True)
+1. Run `setup.py`.
+```bash
+python3 setup.py
 ```
-
-Setup: Follow the challenge upload guide and then uncomment `resetAll()`.  
-Once done, you can comment it out again. (Up to you: anyway debug is still on...)
+2. Run `app.py`
+```bash
+python3 app.py
+```
+3. Check `http://127.0.0.1:5000/`
 
 ### Challenge Upload Guide
 
